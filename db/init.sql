@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS value_table (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    value INT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO value_table (value) VALUES (50); -- 初期値
