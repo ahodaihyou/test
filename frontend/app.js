@@ -16,7 +16,7 @@ const ALERT_COOLDOWN = 60000; // アラートのクールダウン時間（1分�
 
 // 設定の初期化
 let currentThreshold = parseFloat(thresholdInput.value);
-let currentDataPoints = parseInt(dataPointsInput.value);
+let currentDataPoints = 10; // 固定で10個のデータを保持
 let currentUpdateInterval = parseInt(updateIntervalInput.value);
 
 // イベントリスナーの設定
@@ -26,14 +26,56 @@ thresholdInput.addEventListener('change', function() {
 });
 
 dataPointsInput.addEventListener('change', function() {
-    currentDataPoints = parseInt(this.value);
-    updateChart();
+    // データポイント数は固定で10なので、この設定は無視
+    console.log('データポイント数は固定で10個です');
 });
 
 updateIntervalInput.addEventListener('change', function() {
     currentUpdateInterval = parseInt(this.value);
     restartUpdateInterval();
 });
+
+// 過去のデータを取得する関数
+async function fetchHistory() {
+    try {
+        const response = await fetch("http://localhost:8081/history?limit=10");
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const json = await response.json();
+        const data = json.history; // バックエンドのレスポンスから履歴データを取得
+        
+        // データがある場合、履歴に追加
+        if (data && data.length > 0) {
+            dataHistory = data.map(item => {
+                const timestamp = new Date(item.timestamp);
+                return {
+                    time: timestamp.toLocaleTimeString(),
+                    value: item.value,
+                    timestamp: timestamp.getTime()
+                };
+            });
+            
+            // 最新の値を表示
+            const latestData = data[data.length - 1];
+            const latestTimestamp = new Date(latestData.timestamp);
+            currentValueEl.textContent = latestData.value;
+            lastUpdateEl.textContent = latestTimestamp.toLocaleTimeString();
+            lastValue = latestData.value;
+            
+            // グラフ更新
+            updateChart();
+            
+            // 基準値チェック
+            checkThreshold(latestData.value);
+            
+            console.log(`過去のデータを${data.length}件取得しました`);
+        }
+    } catch (error) {
+        console.error("履歴データ取得に失敗:", error);
+    }
+}
 
 // データ取得関数
 async function fetchData() {
@@ -61,9 +103,9 @@ async function fetchData() {
                 timestamp: timestamp.getTime()
             });
 
-            // データポイント数を制限
-            if (dataHistory.length > currentDataPoints) {
-                dataHistory = dataHistory.slice(-currentDataPoints);
+            // データポイント数を10個に制限（11個目になったら古いものを削除）
+            if (dataHistory.length > 10) {
+                dataHistory = dataHistory.slice(-10);
             }
 
             // グラフ更新
@@ -213,19 +255,16 @@ function restartUpdateInterval() {
 }
 
 // 初期化
-function init() {
-    // 初回データ取得
-    fetchData();
+async function init() {
+    // 過去のデータを取得
+    await fetchHistory();
     
     // 定期更新の開始
     restartUpdateInterval();
     
-    // 初期グラフの作成
-    updateChart();
-    
     console.log("水温計システムが起動しました");
     console.log(`更新間隔: ${currentUpdateInterval}秒`);
-    console.log(`グラフデータ数: ${currentDataPoints}個`);
+    console.log(`グラフデータ数: 10個（固定）`);
     console.log(`基準値: ${currentThreshold}°C`);
 }
 
