@@ -170,7 +170,7 @@
                     },
                     body: JSON.stringify({
                         value: parseInt(value),
-                        timestamp: new Date().toISOString()
+                        timestamp: new Date().toISOString().split('.')[0] + 'Z'
                     })
                 });
 
@@ -239,6 +239,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadHistory();
             valueInput.focus(); // ページ読み込み時にフォーカス
+            
+            // 5秒ごとに履歴を更新
+            setInterval(loadHistory, 5000);
         });
     </script>
 </body>

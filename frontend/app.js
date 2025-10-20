@@ -152,7 +152,7 @@ async function sendEmailAlert(value) {
             body: JSON.stringify({
                 value: value,
                 threshold: currentThreshold,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString().split('.')[0] + 'Z'
             })
         });
 
