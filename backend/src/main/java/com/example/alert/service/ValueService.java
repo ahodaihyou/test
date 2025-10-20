@@ -37,7 +37,12 @@ public class ValueService {
         entity.setValue(value);
         
         if (timestamp != null && !timestamp.isEmpty()) {
-            entity.setTimestamp(LocalDateTime.parse(timestamp.replace("Z", "")));
+            // マイクロ秒を除去してパース
+            String cleanTimestamp = timestamp.replace("Z", "");
+            if (cleanTimestamp.contains(".")) {
+                cleanTimestamp = cleanTimestamp.split("\\.")[0];
+            }
+            entity.setTimestamp(LocalDateTime.parse(cleanTimestamp));
         } else {
             entity.setTimestamp(LocalDateTime.now());
         }
