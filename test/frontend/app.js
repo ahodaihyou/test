@@ -38,7 +38,9 @@ updateIntervalInput.addEventListener('change', function() {
 // 過去のデータを取得する関数
 async function fetchHistory() {
     try {
-        const response = await fetch("http://localhost:8081/history?limit=10");
+        const response = await fetch("http://localhost:8081/history?limit=10", {
+            cache: "no-store"
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -80,7 +82,9 @@ async function fetchHistory() {
 // データ取得関数
 async function fetchData() {
     try {
-        const response = await fetch("http://localhost:8081/value");
+        const response = await fetch("http://localhost:8081/value", {
+            cache: "no-store"
+        });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -89,34 +93,31 @@ async function fetchData() {
         const value = json.value;
         const timestamp = new Date();
 
-        // 値が変更された場合のみ更新
-        if (lastValue !== value) {
-            // 値表示
-            currentValueEl.textContent = value;
-            lastUpdateEl.textContent = timestamp.toLocaleTimeString();
-            lastValue = value;
+        // 値表示
+        currentValueEl.textContent = value;
+        lastUpdateEl.textContent = timestamp.toLocaleTimeString();
+        lastValue = value;
 
-            // データ履歴に追加
-            dataHistory.push({ 
-                time: timestamp.toLocaleTimeString(), 
-                value: value,
-                timestamp: timestamp.getTime()
-            });
+        // データ履歴に追加（受信のたびに記録）
+        dataHistory.push({ 
+            time: timestamp.toLocaleTimeString(), 
+            value: value,
+            timestamp: timestamp.getTime()
+        });
 
-            // データポイント数を10個に制限（11個目になったら古いものを削除）
-            if (dataHistory.length > 10) {
-                dataHistory = dataHistory.slice(-10);
-            }
-
-            // グラフ更新
-            updateChart();
-
-            // 基準値チェック
-            checkThreshold(value);
-
-            // 値が変更されたことをコンソールに表示
-            console.log(`新しい水温が検出されました: ${value}°C (時刻: ${timestamp.toLocaleTimeString()})`);
+        // データポイント数を10個に制限（11個目になったら古いものを削除）
+        if (dataHistory.length > 10) {
+            dataHistory = dataHistory.slice(-10);
         }
+
+        // グラフ更新
+        updateChart();
+
+        // 基準値チェック
+        checkThreshold(value);
+
+        // 受信ログ
+        console.log(`水温を受信しました: ${value}°C (時刻: ${timestamp.toLocaleTimeString()})`);
 
     } catch (error) {
         console.error("データ取得に失敗:", error);
@@ -258,6 +259,9 @@ function restartUpdateInterval() {
 async function init() {
     // 過去のデータを取得
     await fetchHistory();
+
+    // すぐに最新値を取得
+    await fetchData();
     
     // 定期更新の開始
     restartUpdateInterval();
