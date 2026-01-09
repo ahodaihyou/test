@@ -27,12 +27,12 @@ public class ValueService {
         this.mailSender = mailSender;
     }
 
-    public int getLatestValue() {
+    public double getLatestValue() {
         Optional<ValueEntity> entity = Optional.ofNullable(valueRepository.findTopByOrderByTimestampDesc());
-        return entity.map(ValueEntity::getValue).orElse(0);
+        return entity.map(ValueEntity::getValue).orElse(0.0);
     }
 
-    public void saveValue(int value, String timestamp) {
+    public void saveValue(double value, String timestamp) {
         ValueEntity entity = new ValueEntity();
         entity.setValue(value);
         
@@ -60,14 +60,14 @@ public class ValueService {
         }).collect(Collectors.toList());
     }
 
-    public void sendAlertEmail(int value, int threshold, String timestamp) {
+    public void sendAlertEmail(double value, double threshold, String timestamp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo("hiro0507mu@icloud.com");
         message.setSubject("基準値オーバー");
         message.setText(String.format(
             "基準値を超える数値が検出されました。\n\n" +
-            "検出値: %d\n" +
-            "基準値: %d\n" +
+            "検出値: %.2f\n" +
+            "基準値: %.2f\n" +
             "検出時刻: %s\n\n" +
             "このメールは自動送信されています。",
             value, threshold, timestamp

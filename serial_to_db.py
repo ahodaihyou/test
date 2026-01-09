@@ -57,7 +57,7 @@ def main():
                     # 今のHTMLフォームと同じ形式でJSONを送る
                     payload = {
                         "value": val,
-                        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.localtime())
                     }
                     
                     response = requests.post(API_URL, json=payload)

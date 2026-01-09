@@ -11,7 +11,7 @@ public class ValueEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private int value;
+    private double value;
 
     private LocalDateTime timestamp;
 
@@ -23,11 +23,11 @@ public class ValueEntity {
         this.id = id;
     }
 
-    public int getValue() {
+    public double getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(double value) {
         this.value = value;
     }
 

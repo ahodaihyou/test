@@ -21,7 +21,7 @@ public class ValueController {
 
     @GetMapping("/value")
     public Map<String, Object> getValue() {
-        int value = valueService.getLatestValue();
+        double value = valueService.getLatestValue();
         Map<String, Object> response = new HashMap<>();
         response.put("value", value);
         return response;
@@ -30,7 +30,8 @@ public class ValueController {
     @PostMapping("/value")
     public Map<String, Object> saveValue(@RequestBody Map<String, Object> data) {
         try {
-            int value = (Integer) data.get("value");
+            Number valueNumber = (Number) data.get("value");
+            double value = valueNumber.doubleValue();
             String timestamp = (String) data.get("timestamp");
             
             valueService.saveValue(value, timestamp);
@@ -58,8 +59,10 @@ public class ValueController {
     @PostMapping("/alert")
     public Map<String, Object> sendAlert(@RequestBody Map<String, Object> alertData) {
         try {
-            int value = (Integer) alertData.get("value");
-            int threshold = (Integer) alertData.get("threshold");
+            Number valueNumber = (Number) alertData.get("value");
+            Number thresholdNumber = (Number) alertData.get("threshold");
+            double value = valueNumber.doubleValue();
+            double threshold = thresholdNumber.doubleValue();
             String timestamp = (String) alertData.get("timestamp");
             
             valueService.sendAlertEmail(value, threshold, timestamp);
